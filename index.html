@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#060b1a"/>
+  <meta name="description" content="DropBeam — Drop a file. Beam it anywhere. Fast P2P file sharing, no server, no limits."/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="DropBeam"/>
+  <title>DropBeam — P2P File Transfer</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" href="icons/icon-192.png"/>
+  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <span class="brand-name">DropBeam</span>
+    </div>
+    <div class="status">
+      <div class="dot offline" id="status-dot"></div>
+      <span id="status-text">Ready</span>
+    </div>
+  </header>
+
+  <!-- ══ SCREEN: HOME ══ -->
+  <div class="screen active" id="screen-home">
+    <div class="hero">
+      <span class="hero-icon">⚡</span>
+      <h1>Drop a file.<br/>Beam it anywhere.</h1>
+      <p>Direct device-to-device transfer.<br/>No servers. No limits. No sign-up.</p>
+    </div>
+
+    <div class="choice-cards">
+      <div class="choice-card send" id="btn-send">
+        <div class="choice-ico">📤</div>
+        <div class="choice-info">
+          <h3>Send Files</h3>
+          <p>Share your files. Get a code & QR for the receiver.</p>
+        </div>
+        <span class="choice-arrow">›</span>
+      </div>
+      <div class="choice-card receive" id="btn-receive">
+        <div class="choice-ico">📥</div>
+        <div class="choice-info">
+          <h3>Receive Files</h3>
+          <p>Enter the sender's code or scan their QR.</p>
+        </div>
+        <span class="choice-arrow">›</span>
+      </div>
+    </div>
+
+    <div class="features">
+      <div class="feat"><span class="feat-ico">🔒</span><span class="feat-txt">End-to-end encrypted</span></div>
+      <div class="feat"><span class="feat-ico">⚡</span><span class="feat-txt">Any file size</span></div>
+      <div class="feat"><span class="feat-ico">📡</span><span class="feat-txt">Works offline (WiFi)</span></div>
+      <div class="feat"><span class="feat-ico">📱</span><span class="feat-txt">Any device</span></div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: LOADING ══ -->
+  <div class="screen" id="screen-loading">
+    <div class="loading-wrap">
+      <div class="loader"></div>
+      <span class="loading-txt">Setting up connection…</span>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: SENDER — WAIT FOR RECEIVER ══ -->
+  <div class="screen" id="screen-sender-wait">
+    <div class="card">
+      <div class="card-title">Your Connection Code</div>
+      <div class="code-display">
+        <span class="code-text" id="sender-code">—</span>
+        <button class="btn-icon-sm" id="btn-copy-code" title="Copy code">📋</button>
+      </div>
+      <p style="font-size:0.73rem;color:var(--text3);margin-top:8px;">Share this code or the QR below with the receiver.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Scan QR Code</div>
+      <div class="qr-wrap">
+        <div id="qr-code"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Or share link</div>
+      <div class="share-row">
+        <input type="text" id="share-link" readonly placeholder="Generating link…"/>
+        <button class="btn-icon-sm" id="btn-copy-link">Copy</button>
+      </div>
+    </div>
+
+    <div class="waiting">
+      <div class="waiting-ring">⏳</div>
+      <h3>Waiting for receiver…</h3>
+      <p>Keep this tab open.<br/>Connection is ready.</p>
+    </div>
+
+    <button class="btn btn-ghost btn-home">← Back to Home</button>
+  </div>
+
+  <!-- ══ SCREEN: SENDER — SELECT & SEND FILES ══ -->
+  <div class="screen" id="screen-sender-send">
+    <div class="card">
+      <div class="card-title" style="color:var(--green)">✅ Receiver Connected</div>
+      <p style="font-size:0.8rem;color:var(--text2);line-height:1.6;">Select files to send. Any size, any type.</p>
+    </div>
+
+    <div id="drop-zone">
+      <span class="drop-ico">📂</span>
+      <div class="drop-txt">Tap to select files</div>
+      <div class="drop-sub">or drag & drop here · any file type · any size</div>
+      <input type="file" id="file-input" multiple style="display:none"/>
+    </div>
+
+    <div id="file-list-wrap">
+      <div class="card">
+        <div class="card-title">Selected Files</div>
+        <div id="file-list"></div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="btn-send-files" style="display:none">
+      <span class="btn-icon">⚡</span> Beam Files Now
+    </button>
+
+    <button class="btn btn-ghost btn-home">← Disconnect</button>
+  </div>
+
+  <!-- ══ SCREEN: RECEIVER — ENTER CODE ══ -->
+  <div class="screen" id="screen-receiver-enter">
+    <div class="hero" style="padding-top:8px">
+      <span class="hero-icon" style="font-size:2.5rem;">📥</span>
+      <h1 style="font-size:1.5rem;">Receive a File</h1>
+      <p>Enter the sender's connection code<br/>or scan their QR code.</p>
+    </div>
+
+    <div class="card">
+      <div class="inp-group">
+        <label class="inp-label">Connection Code</label>
+        <input class="inp" type="text" id="peer-input" placeholder="Paste code here…" autocomplete="off" autocorrect="off" spellcheck="false"/>
+      </div>
+      <button class="btn btn-primary" id="btn-connect" style="margin-top:12px;width:100%">
+        <span class="btn-icon">📡</span> Connect & Receive
+      </button>
+    </div>
+
+    <div class="divider">or</div>
+
+    <div class="card" style="text-align:center;padding:16px;">
+      <p style="font-size:0.78rem;color:var(--text2);line-height:1.6;">Ask the sender to scan your QR from their waiting screen, or open the link they share with you.</p>
+    </div>
+
+    <button class="btn btn-ghost btn-home">← Back</button>
+  </div>
+
+  <!-- ══ SCREEN: RECEIVER — WAITING FOR FILE ══ -->
+  <div class="screen" id="screen-receiver-wait">
+    <div class="loading-wrap">
+      <div class="waiting-ring" style="font-size:2rem;">📡</div>
+      <h3 style="font-size:1rem;font-weight:600;color:var(--text);">Connected!</h3>
+      <p style="font-size:0.8rem;color:var(--text2);text-align:center;line-height:1.6;">Waiting for the sender<br/>to choose and send files…</p>
+    </div>
+    <button class="btn btn-ghost btn-home" style="margin-top:auto;">← Disconnect</button>
+  </div>
+
+  <!-- ══ SCREEN: SENDING ══ -->
+  <div class="screen" id="screen-sending">
+    <div class="card">
+      <div class="card-title">Sending</div>
+      <div class="progress-file">
+        <span class="progress-ico" id="send-icon">📦</span>
+        <div class="progress-info">
+          <span class="progress-name" id="send-filename">—</span>
+          <span class="progress-size" id="send-filesize">—</span>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="send-progress-bar" style="width:0%"></div>
+      </div>
+      <div class="progress-pct" id="send-percent">0%</div>
+    </div>
+    <div class="card" style="text-align:center;padding:18px;">
+      <div class="waiting-ring" style="font-size:1.5rem;margin:0 auto 10px;">⚡</div>
+      <p style="font-size:0.8rem;color:var(--text2);line-height:1.6;">Transferring directly to receiver.<br/>Keep this tab open.</p>
+      <p style="font-size:0.7rem;color:var(--text3);margin-top:6px;font-family:'JetBrains Mono',monospace;" id="send-total"></p>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: RECEIVING ══ -->
+  <div class="screen" id="screen-receiving">
+    <div class="card">
+      <div class="card-title">Receiving</div>
+      <div class="progress-file">
+        <span class="progress-ico" id="recv-icon">📦</span>
+        <div class="progress-info">
+          <span class="progress-name" id="recv-filename">—</span>
+          <span class="progress-size" id="recv-filesize">—</span>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="recv-progress-bar" style="width:0%"></div>
+      </div>
+      <div class="progress-pct" id="recv-percent">0%</div>
+    </div>
+    <div class="card" style="text-align:center;padding:18px;">
+      <div class="waiting-ring" style="font-size:1.5rem;margin:0 auto 10px;">📡</div>
+      <p style="font-size:0.8rem;color:var(--text2);line-height:1.6;">Receiving file directly.<br/>Download will start automatically.</p>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: DONE — SEND ══ -->
+  <div class="screen" id="screen-done-send">
+    <span class="done-icon">✅</span>
+    <div class="done-info">
+      <h2>File Sent!</h2>
+      <p>Transfer complete. The receiver has your file.</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-send-another" onclick="document.getElementById('screen-done-send').classList.remove('active'); document.getElementById('screen-sender-send').classList.add('active');">
+        <span class="btn-icon">📤</span> Send Another
+      </button>
+      <button class="btn btn-ghost btn-home">← Home</button>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: DONE — RECEIVE ══ -->
+  <div class="screen" id="screen-done-receive">
+    <span class="done-icon">🎉</span>
+    <div class="done-info">
+      <h2>File Received!</h2>
+      <p>Your download started automatically.</p>
+    </div>
+    <div class="done-file">
+      <span class="file-ico" id="dl-icon">📦</span>
+      <div class="file-info" style="flex:1;min-width:0;">
+        <span class="file-name" id="dl-filename">—</span>
+        <span class="file-size" id="dl-filesize">—</span>
+      </div>
+      <a class="btn btn-primary" id="dl-link" style="text-decoration:none;padding:10px 14px;font-size:0.78rem;" download>
+        ⬇ Save
+      </a>
+    </div>
+    <button class="btn btn-ghost btn-home">← Home</button>
+  </div>
+
+  <footer class="footer">
+    DropBeam · P2P · No servers · No limits
+  </footer>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="transfer.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
