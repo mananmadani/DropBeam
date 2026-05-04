@@ -1,0 +1,49 @@
+# ── OS files ──────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── Editor & IDE ──────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
+*~
+
+# ── Node (if you ever add a dev server) ───────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.pnp.*
+.yarn/
+
+# ── Build output ──────────────────────────────────
+dist/
+build/
+out/
+
+# ── Environment & secrets ─────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Logs ──────────────────────────────────────────
+*.log
+logs/
+
+# ── Misc ──────────────────────────────────────────
+.cache/
+.temp/
+*.tmp
